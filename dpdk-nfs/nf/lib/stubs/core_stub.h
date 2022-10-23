@@ -12,12 +12,12 @@
 // HACK: see rte_mbuf.h for an explanation
 #include "include_ignored_by_verifast.h"
 #ifdef VIGOR_STUB_DPDK
-#include <_internal_rte_mbuf.h>
+#include <rte_mbuf__internal.h>
 #else
 #ifdef _NO_VERIFAST_
 struct rte_mbuf;
 #else
-#include <_internal_rte_mbuf.h>
+#include <rte_mbuf__internal.h>
 #endif
 #endif
 

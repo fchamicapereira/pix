@@ -244,7 +244,7 @@ source_install_pin()
 	if [ ! -f pin/.version ] || [ "$(cat pin/.version)" != "$PIN_RELEASE" ]
 	then
 		rm -rf pin
-		curl -s "${url}${file}" | tar xzf -
+		curl -A "Mozilla/4.0" -s "${url}${file}" | tar xzf -
 		mv "pin-$PIN_RELEASE-gcc-linux" pin
 		echo "$PIN_RELEASE" > pin/.version
 	fi
@@ -269,7 +269,7 @@ source_install_z3()
 	fi
 
 	if  [ ! -f "build/z3" ] || [ ! "z3-$(build/z3 --version | cut -f3 -d' ')" = "$Z3_RELEASE" ];	then
-		python scripts/mk_make.py -p "$BUILDDIR/z3/build"
+		python3 scripts/mk_make.py -p "$BUILDDIR/z3/build"
 		cd build
 		make -kj || make
 		make install
@@ -305,12 +305,12 @@ source_install_llvm()
 		mv "$BUILDDIR/llvm-project/clang" "$BUILDDIR/llvm/tools/clang"
 		rm -rf "$BUILDDIR/llvm-project"
 		cd llvm
-	       	mkdir build
+		mkdir build
 		cd build
 		[ -f "Makefile" ] || \
 			CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0" \
-			cmake ../
-		make -j30
+			cmake -DLLVM_PARALLEL_LINK_JOBS=1 ../
+		make -j4
 	fi
 }
 
@@ -506,7 +506,9 @@ package_install \
 	gcc-multilib \
 	graphviz \
 	libnuma-dev \
-	cmake
+	cmake \
+	libelf-dev \
+	pkgconf
 
 # Clean things
 [ -n "$CLEAN_DPDK" ]        && clean_dpdk
@@ -525,3 +527,5 @@ package_install \
 { [ -n "$INSTALL_ALL" ] || [ -n "$INSTALL_KLEE_UCLIBC" ] ; } && source_install_klee_uclibc
 { [ -n "$INSTALL_ALL" ] || [ -n "$INSTALL_OCAML" ] ; } && bin_install_ocaml
 { [ -n "$INSTALL_ALL" ] || [ -n "$INSTALL_KLEE" ] ; } && source_install_klee
+
+echo 'source $PATHSFILE' >> $HOME/.profile
